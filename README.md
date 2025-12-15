@@ -1,2 +1,2 @@
 # Proiect-IA
-Proiect IA - Regula Dempster-Shafter
+Proiect IA - Regula Dempster-Shafter - Ionut
