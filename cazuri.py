@@ -27,7 +27,7 @@ def afisare_tabel_stil_curs(m1, m2, titlu="TABEL COMBINARE EVIDENTE (Stil Curs)"
         print(f"Factor de normalizare = (1 / (1 - K)): 1 / (1 - {conflict_sum:.4f}) = {1/(1-conflict_sum):.4f}")
     else:
         print("Nu exista conflict intre surse.")
-    print("-" * 105)
+    
 
 def afisare_rezultate_detaliate(metrics, conflict_val):
     print("\nREZULTATE DETALIATE ALE COMBINARII EVIDENTELOR")
@@ -39,6 +39,7 @@ def afisare_rezultate_detaliate(metrics, conflict_val):
         subset_str = format_set(subset)
         print(f"{subset_str:<30} | {vals['mass']:.4f}     | {vals['bel']:.4f}     | {vals['pl']:.4f}     | {vals['incertitudine']:.4f}")
         print("-" * 90)
+
 def afisare_interpretare_decizie(metrics):
     print("INTERPRETARE DECIZIE:")
     if not metrics:
@@ -85,7 +86,7 @@ def caz_medical_complex():
     # Universul discursului: Posibile diagnostice
     theta = frozenset({"Gripa", "Raceala", "Pneumonie"})
 
-    print("\n>>> SCENARIUL 1: CONSENS (Simptome clare + Test Rapid Pozitiv)")
+    print("\n SCENARIUL 1: CONSENS (Simptome clare + Test Rapid Pozitiv)")
     print("Descriere: Medicul suspecteaza Gripa (0.8), Testul rapid confirma Gripa (0.9).")
     
     m_medic = {frozenset({"Gripa"}): 0.8, theta: 0.2}
@@ -98,7 +99,7 @@ def caz_medical_complex():
     afisare_rezultate_detaliate(metrics_1, k1)
     afisare_interpretare_decizie(metrics_1)
     
-    print("\n>>> SCENARIUL 2: RAFINARE (Excluderea prin intersectie)")
+    print("\n SCENARIUL 2: RAFINARE (Excluderea prin intersectie)")
     print("Descriere: \nSursa 1 (Simptome Generale): Poate fi Gripa sau Pneumonie (febra mare).\nSursa 2 (Radiografie): Plamanii sunt curati (Exclude Pneumonia).")
     
     m_simptome = {frozenset({"Gripa", "Pneumonie"}): 0.8, theta: 0.2}
@@ -111,7 +112,7 @@ def caz_medical_complex():
     afisare_rezultate_detaliate(metrics_2, k2)
     afisare_interpretare_decizie(metrics_2)
     
-    print("\n>>> SCENARIUL 3: IGNORANTA (Incertitudine ridicata)")
+    print("\n SCENARIUL 3: IGNORANTA (Incertitudine ridicata)")
     print("Descriere: Pacient atipic. Medicul e nesigur, Analizele sunt neconcludente.")
     
     # Masa mare pe Theta inseamna "Nu stiu"
@@ -125,7 +126,7 @@ def caz_medical_complex():
     afisare_rezultate_detaliate(metrics_3, k3)
     afisare_interpretare_decizie(metrics_3)
 
-    print("\n>>> SCENARIUL 4: CONFLICT MODERAT (Opinie divergenta)")
+    print("\n SCENARIUL 4: CONFLICT MODERAT (Opinie divergenta)")
     print("Descriere: \nSpecialist 1 zice Pneumonie (0.7).\nSpecialist 2 zice Raceala (0.7).\nAmandoi accepta o marja de eroare (Theta).")
     
     m_spec1 = {frozenset({"Pneumonie"}): 0.7, theta: 0.3}
@@ -140,7 +141,7 @@ def caz_medical_complex():
     
     print(f" Conflictul K este {k4:.2f}. Masa conflictuala a fost redistribuita proportional catre ipotezele ramase.")
 
-    print("\n>>> SCENARIUL 5: CONFLICT TOTAL (Eroare/Paradox)")
+    print("\n SCENARIUL 5: CONFLICT TOTAL (Eroare/Paradox)")
     print("Descriere: Doua surse sigure se contrazic complet (K ~ 1.0).")
     
     m_paradox1 = {frozenset({"Gripa"}): 0.99, frozenset({"Pneumonie"}): 0.01}
@@ -155,10 +156,7 @@ def caz_medical_complex():
 
 def caz_bancar_complex():
     ds = DempsterShafer()
-    print("\n\n" + "="*60)
-    print("=== STUDIU DE CAZ 2: DETECTAREA FRAUDELOR BANCARE ===")
-    print("="*60)
-
+    print(" STUDIU DE CAZ 2: DETECTAREA FRAUDELOR BANCARE ")
     theta = frozenset({"ClientBun", "ClientRiscant", "Frauda"})
         
     scenarii=[
@@ -183,7 +181,7 @@ def caz_bancar_complex():
     ]
 
     for caz in scenarii:
-        print(f"\n\n>>> ANALIZA: {caz['nume']}")
+        print(f"\n\n ANALIZA: {caz['nume']}")
         afisare_tabel_stil_curs(caz['m_venit'], caz['m_istoric'], titlu=f"DETALIU CALCUL (Venit vs Istoric) pentru {caz['nume']}")
         surse=[caz['m_venit'], caz['m_istoric'], caz['m_comp']]
         result, k = ds.combinare(surse)
@@ -199,5 +197,5 @@ def caz_bancar_complex():
             print(f"Sistemul indica CLIENT BUN cu un grad de certitudine de {metrics[top_hyp]['bel']*100:.1f}%")
         else:
             print(f"Sistemul nu poate lua o decizie clara, ipoteza principala este {list(top_hyp)} cu un grad de certitudine de {metrics[top_hyp]['bel']*100:.1f}%")
-        print("-"*60)
+        
 
