@@ -39,37 +39,119 @@ def afisare_rezultate_detaliate(metrics, conflict_val):
         subset_str = format_set(subset)
         print(f"{subset_str:<30} | {vals['mass']:.4f}     | {vals['bel']:.4f}     | {vals['pl']:.4f}     | {vals['incertitudine']:.4f}")
         print("-" * 90)
+def afisare_interpretare_decizie(metrics):
+    print("INTERPRETARE DECIZIE:")
+    if not metrics:
+        print("Nu exista date pentru interpretare.")
+        return
+    items = list(metrics.items())
+    best_bel = items[0][1]['bel']
+
+    winners = []
+    for hyp, vals in items:
+        if abs(vals['bel'] - best_bel) < 0.0001:  
+            winners.append(hyp)
+
+    if len(winners) > 1:
+        nume_winners = []
+        for w in winners:
+            nume_winners.append(", ".join(sorted(list(w))).upper())
+            
+        print(f"CONFLICT DE DECIZIE: Sistemul nu poate diferentia intre: {' si '.join(nume_winners)}")
+        print(f"Ambele au un grad de certitudine egal de {best_bel*100:.1f}%.")
+        print("Se recomanda investigatii suplimentare pentru a departaja.")
+        
+    else:
+        top_hyp_set = winners[0]
+        hyp_list = sorted(list(top_hyp_set))
+        
+        if len(hyp_list) == 1:
+            print(f"Sistemul indica {hyp_list[0].upper()} cu un grad de certitudine de {best_bel*100:.1f}%")
+        
+        elif len(hyp_list) >= 3: 
+            print("Sistemul NU poate lua o decizie clara (Incertitudine ridicata - Ignoranta).")
+            print("Sunt necesare investigatii suplimentare.")
+            
+        else:
+            print(f"Sistemul indica o zona probabila intre: {', '.join(hyp_list).upper()} ({best_bel*100:.1f}%)")
+            print("Diagnosticul exact nu a putut fi izolat complet.")
+            
+    print("-" * 60)
 
 def caz_medical_complex():
     ds = DempsterShafer()
-    print("\n\n" + "="*50)
-    print("=== STUDIU DE CAZ 1: DIAGNOSTIC MEDICAL ===")
-    print("="*50)
-    
-    theta = frozenset({"Raceala", "Gripa", "Meningita"})
+    print("\nSUITA TESTE: DIAGNOSTIC MEDICAL COMPLET")
 
-    m1 = {frozenset({"Raceala", "Gripa"}): 0.6, theta: 0.4}
-    
-    m2 = {frozenset({"Meningita"}): 0.7, theta: 0.3}
+    # Universul discursului: Posibile diagnostice
+    theta = frozenset({"Gripa", "Raceala", "Pneumonie"})
 
-    m3 = {frozenset({"Gripa", "Meningita"}): 0.8, theta: 0.2}
-
-    print("Scenariu: Pacient cu Febra, Pete si Analize ce indica infectie grava.")
-    print("Combinam opiniile celor 3 surse...")
-
-    afisare_tabel_stil_curs(m1, m2, titlu="COMBINARE: Simptome (m1) + Analize (m2)")
-
-    final_m, k = ds.combinare([m1, m2, m3])
+    print("\n>>> SCENARIUL 1: CONSENS (Simptome clare + Test Rapid Pozitiv)")
+    print("Descriere: Medicul suspecteaza Gripa (0.8), Testul rapid confirma Gripa (0.9).")
     
-    metrics = ds.calculeaza_bel_pl(final_m)
-    afisare_rezultate_detaliate(metrics, k)
+    m_medic = {frozenset({"Gripa"}): 0.8, theta: 0.2}
+    m_test  = {frozenset({"Gripa"}): 0.9, theta: 0.1}
     
-    best_hyp = list(metrics.keys())[0]
-    best_bel = metrics[best_hyp]['bel']
+    afisare_tabel_stil_curs(m_medic, m_test, titlu="Calcul Consens: Medic vs Test")
     
-    print(f"\nCONCLUZIE MEDICALA:")
-    print(f"Sistemul a identificat diagnosticul: {list(best_hyp)}")
-    print(f"Gradul minim de certitudine (Belief): {best_bel*100:.1f}%")
+    rezultat_1, k1 = ds.combinare([m_medic, m_test])
+    metrics_1 = ds.calculeaza_bel_pl(rezultat_1)
+    afisare_rezultate_detaliate(metrics_1, k1)
+    afisare_interpretare_decizie(metrics_1)
+    
+    print("\n>>> SCENARIUL 2: RAFINARE (Excluderea prin intersectie)")
+    print("Descriere: \nSursa 1 (Simptome Generale): Poate fi Gripa sau Pneumonie (febra mare).\nSursa 2 (Radiografie): Plamanii sunt curati (Exclude Pneumonia).")
+    
+    m_simptome = {frozenset({"Gripa", "Pneumonie"}): 0.8, theta: 0.2}
+    m_radio = {frozenset({"Gripa", "Raceala"}): 0.9, theta: 0.1}
+    
+    afisare_tabel_stil_curs(m_simptome, m_radio, titlu="Calcul Rafinare: Simptome vs Radiografie")
+    
+    rezultat_2, k2 = ds.combinare([m_simptome, m_radio])
+    metrics_2 = ds.calculeaza_bel_pl(rezultat_2)
+    afisare_rezultate_detaliate(metrics_2, k2)
+    afisare_interpretare_decizie(metrics_2)
+    
+    print("\n>>> SCENARIUL 3: IGNORANTA (Incertitudine ridicata)")
+    print("Descriere: Pacient atipic. Medicul e nesigur, Analizele sunt neconcludente.")
+    
+    # Masa mare pe Theta inseamna "Nu stiu"
+    m_nesigur1 = {frozenset({"Raceala"}): 0.1, theta: 0.9}
+    m_nesigur2 = {theta: 1.0} # A doua sursa nu stie nimic
+    
+    afisare_tabel_stil_curs(m_nesigur1, m_nesigur2, titlu="Calcul Ignoranta: Medic vs Analize")
+
+    rezultat_3, k3 = ds.combinare([m_nesigur1, m_nesigur2])
+    metrics_3 = ds.calculeaza_bel_pl(rezultat_3)
+    afisare_rezultate_detaliate(metrics_3, k3)
+    afisare_interpretare_decizie(metrics_3)
+
+    print("\n>>> SCENARIUL 4: CONFLICT MODERAT (Opinie divergenta)")
+    print("Descriere: \nSpecialist 1 zice Pneumonie (0.7).\nSpecialist 2 zice Raceala (0.7).\nAmandoi accepta o marja de eroare (Theta).")
+    
+    m_spec1 = {frozenset({"Pneumonie"}): 0.7, theta: 0.3}
+    m_spec2 = {frozenset({"Raceala"}): 0.7, theta: 0.3}
+    
+    afisare_tabel_stil_curs(m_spec1, m_spec2, titlu="Calcul Conflict: Pneumonie vs Raceala")
+    
+    rezultat_4, k4 = ds.combinare([m_spec1, m_spec2])
+    metrics_4 = ds.calculeaza_bel_pl(rezultat_4)
+    afisare_rezultate_detaliate(metrics_4, k4)
+    afisare_interpretare_decizie(metrics_4)
+    
+    print(f" Conflictul K este {k4:.2f}. Masa conflictuala a fost redistribuita proportional catre ipotezele ramase.")
+
+    print("\n>>> SCENARIUL 5: CONFLICT TOTAL (Eroare/Paradox)")
+    print("Descriere: Doua surse sigure se contrazic complet (K ~ 1.0).")
+    
+    m_paradox1 = {frozenset({"Gripa"}): 0.99, frozenset({"Pneumonie"}): 0.01}
+    m_paradox2 = {frozenset({"Raceala"}): 0.99, frozenset({"Pneumonie"}): 0.01}
+    
+    try:
+        afisare_tabel_stil_curs(m_paradox1, m_paradox2, titlu="Tentativa Combinare Paradoxala")
+        rezultat_5, k5 = ds.combinare([m_paradox1, m_paradox2])
+        afisare_rezultate_detaliate(ds.calculeaza_bel_pl(rezultat_5), k5)
+    except ValueError as e:
+        print(f"\n SISTEMUL A DETECTAT O EROARE CRITICA: {e}")
 
 def caz_bancar_complex():
     ds = DempsterShafer()
