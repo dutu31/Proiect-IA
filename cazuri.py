@@ -27,7 +27,7 @@ def afisare_tabel_stil_curs(m1, m2, titlu="TABEL COMBINARE EVIDENTE (Stil Curs)"
         print(f"Factor de normalizare = (1 / (1 - K)): 1 / (1 - {conflict_sum:.4f}) = {1/(1-conflict_sum):.4f}")
     else:
         print("Nu exista conflict intre surse.")
-    print("-" * 105)
+    
 
 def afisare_rezultate_detaliate(metrics, conflict_val):
     print("\nREZULTATE DETALIATE ALE COMBINARII EVIDENTELOR")
@@ -39,6 +39,7 @@ def afisare_rezultate_detaliate(metrics, conflict_val):
         subset_str = format_set(subset)
         print(f"{subset_str:<30} | {vals['mass']:.4f}     | {vals['bel']:.4f}     | {vals['pl']:.4f}     | {vals['incertitudine']:.4f}")
         print("-" * 90)
+
 def afisare_interpretare_decizie(metrics):
     print("INTERPRETARE DECIZIE:")
     if not metrics:
@@ -155,10 +156,7 @@ def caz_medical_complex():
 
 def caz_bancar_complex():
     ds = DempsterShafer()
-    print("\n\n" + "="*60)
-    print("=== STUDIU DE CAZ 2: DETECTAREA FRAUDELOR BANCARE ===")
-    print("="*60)
-
+    print(" STUDIU DE CAZ 2: DETECTAREA FRAUDELOR BANCARE ")
     theta = frozenset({"ClientBun", "ClientRiscant", "Frauda"})
         
     scenarii=[
@@ -183,7 +181,7 @@ def caz_bancar_complex():
     ]
 
     for caz in scenarii:
-        print(f"\n\n>>> ANALIZA: {caz['nume']}")
+        print(f"\n\n ANALIZA: {caz['nume']}")
         afisare_tabel_stil_curs(caz['m_venit'], caz['m_istoric'], titlu=f"DETALIU CALCUL (Venit vs Istoric) pentru {caz['nume']}")
         surse=[caz['m_venit'], caz['m_istoric'], caz['m_comp']]
         result, k = ds.combinare(surse)
@@ -199,5 +197,5 @@ def caz_bancar_complex():
             print(f"Sistemul indica CLIENT BUN cu un grad de certitudine de {metrics[top_hyp]['bel']*100:.1f}%")
         else:
             print(f"Sistemul nu poate lua o decizie clara, ipoteza principala este {list(top_hyp)} cu un grad de certitudine de {metrics[top_hyp]['bel']*100:.1f}%")
-        print("-"*60)
+        
 
