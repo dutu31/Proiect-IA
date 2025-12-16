@@ -127,10 +127,10 @@ def caz_medical_complex():
     afisare_interpretare_decizie(metrics_3)
 
     print("\n SCENARIUL 4: CONFLICT MODERAT (Opinie divergenta)")
-    print("Descriere: \nSpecialist 1 zice Pneumonie (0.7).\nSpecialist 2 zice Raceala (0.7).\nAmandoi accepta o marja de eroare (Theta).")
+    print("Descriere: \nSpecialist 1 zice Gripa (0.7).")
     
-    m_spec1 = {frozenset({"Pneumonie"}): 0.7, theta: 0.3}
-    m_spec2 = {frozenset({"Raceala"}): 0.7, theta: 0.3}
+    m_spec1 = {frozenset({"Gripa"}): 0.7, theta: 0.3}
+    m_spec2 = {frozenset({"Pneumonie", "Raceala"}): 0.7, theta: 0.3}
     
     afisare_tabel_stil_curs(m_spec1, m_spec2, titlu="Calcul Conflict: Pneumonie vs Raceala")
     
@@ -169,7 +169,7 @@ def caz_bancar_complex():
         {
             "nume": "CLIENT 2: RISC RIDICAT (Istoric negativ)",
             "m_venit": {frozenset({"ClientBun"}): 0.7, theta: 0.3},
-            "m_istoric": {frozenset({"ClientRiscant"}): 0.8, theta: 0.2},
+            "m_istoric": {frozenset({"ClientRiscant", "Frauda"}): 0.8, theta: 0.2},
             "m_comp": {theta: 1.0}
         },
         {
